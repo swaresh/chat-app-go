@@ -47,8 +47,6 @@ func (client *Client) Read() {
 					client.outgoing <- "\n"
 				}
 				client.outgoing <- "\n"
-
-		
 	}
 }
 
@@ -148,4 +146,5 @@ func Chatter() {
 		conn, _ := listener.Accept()
 		chatRoom.joins <- conn
 	}
+}
 }
