@@ -8,8 +8,8 @@ import (
 	"log"
 	"os/exec"
 	"strings"
-	"net/http"
-	"github.com/gin-gonic/gin"
+	// "net/http"
+	// "github.com/gin-gonic/gin"
 )
 
 type Client struct {
@@ -25,7 +25,8 @@ func (client *Client) Read() {
 		line, _ := client.reader.ReadString('\n')
 		client.incoming <- line
 		line = strings.TrimSpace(line)
-		cmd := exec.Command("go", "run", "agent.go")
+		cmd := exec.Command("")
+		command := ""
 		switch line {
 			case "build agent" :
 				cmd = exec.Command("go", "run", "agent.go")
@@ -33,7 +34,11 @@ func (client *Client) Read() {
 				cmd = exec.Command("go", "run", "asset.go")
 			case "build performance" :
 				cmd = exec.Command("go", "run", "performance.go")
+				default: command = "invalid-input"
 			}
+				if command=="invalid-input"{
+					client.outgoing <- "I am not able to process your request. Please choose from\n1.build agent 2.build asset 3.build performance\n"
+				} else {
 				cmd.Stdin = strings.NewReader("")
 				var out bytes.Buffer
 				cmd.Stdout = &out
@@ -42,11 +47,13 @@ func (client *Client) Read() {
 					log.Fatal(err)
 				}
 				parts := strings.Split(out.String(), "\n")
+				client.outgoing <- "\n"
 				for _, part := range parts{
 					client.outgoing <- part
 					client.outgoing <- "\n"
 				}
-				client.outgoing <- "\n"
+				// client.outgoing <- "\n"
+			}
 	}
 }
 
@@ -127,12 +134,12 @@ func NewChatRoom() *ChatRoom {
 }
 
 func main() {
-	r := gin.Default()
+	// r := gin.Default()
 
-	r.GET("/", func(c *gin.Context) {
-		http.ServeFile(c.Writer, c.Request, "index.html")
-	})
-	r.Run(":5000")
+	// r.GET("/", func(c *gin.Context) {
+	// 	http.ServeFile(c.Writer, c.Request, "index.html")
+	// })
+	// r.Run(":5000")
 
 	Chatter()
 }
@@ -146,5 +153,4 @@ func Chatter() {
 		conn, _ := listener.Accept()
 		chatRoom.joins <- conn
 	}
-}
 }
